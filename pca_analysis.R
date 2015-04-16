@@ -42,4 +42,5 @@ joined %>% prcomp() -> pca
 pca_data <- data.frame(pca$x, condition=filtered$Growth.Conditions)
 
 # Generate plot
-ggplot(pca_data, aes(x=PC1, y=PC2, color=condition)) + geom_point()
+p <- ggplot(pca_data, aes(x=PC1, y=PC2, color=condition)) + geom_point()
+ggsave('pca_all_samples.pdf',plot=p)
