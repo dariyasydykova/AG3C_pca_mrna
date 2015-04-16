@@ -12,8 +12,8 @@ library(ggplot2)
 # data frame for easy analysis.
 reads <- read.csv('deseq_normalized_mrna_data.csv')
 reads %>% gather(sample, count, -X) -> reads
-metadata <- read.csv('sample_list.csv')
-joined <- inner_join(reads,metadata,by = c('sample'='Sample')) %>%
+metadata <- read.csv('metaRNA.csv')
+joined <- inner_join(reads,metadata,by = c('sample'='dataSet')) %>%
   rename(gene=X) %>%
   spread(gene,count)
 
