@@ -2,12 +2,15 @@
 title: "AG3C_PCA"
 output: html_document
 ---
+## Abstract
+
+## Results
 
 ### All Samples, All Conditions, All Time Points
-```{r, fig.width=10, fig.height=5, echo=FALSE}
+```{r, fig.width=10, fig.height=5, echo=FALSE, message=FALSE}
 ##########################################################################
 # This script must be run with 'deseq_normalized_mrna_data.csv' and
-# 'sample_list.csv' in the current working directory.
+# 'metaRNA.csv' in the current working directory.
 ##########################################################################
 
 rm(list=ls())
@@ -77,4 +80,33 @@ plot_pca(filtered, filtered$GrowthConditions)
 
 ```
 
+### All Samples, All Condtions, for each time point. 
+```{r, fig.width=10, fig.height=5, echo=FALSE}
+t_hr <- unique(joined$Growthtime.hr.)
+for (t in t_hr)
+{
+  joined %>% filter(Growthtime.hr.==t) -> filtered
+  if (length(unique(filtered$GrowthConditions))>1) plot_pca(filtered, filtered$GrowthConditions)
+} 
+```
+
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+## Methods
+
+### Data Normalization
+
+### Principal Component Analysis
+
+We did data manipulations, PCA calculations, and data visualizations in R 3.1.2 [1]. We used two R packages, tidyr and dplyr, to format and filter data for given growth conditions and time points [2,3]. After filtering, we used prcomp() (R built-in function) with default arguments to do PCA. prcomp() uses singular value decomposition method, which is a preferred method for genome-wide expression data analysis [4]. For all PCA plots we used R package ggplot2 [5]. Our code for this section is available [here](https://github.com/dariyasydykova/AG3C_pca_mrna).     
+
+### Gene Network Analysis
+
+
+#### References
+
+1. R. Ihaka, R Gentleman (1996). R: A Language for Data Analysis and Graphics. Journal of Computational and Graphical Statistics. 5:299-314
+2. tidyr ???
+3. H. Wickam (2009). plyr: Tools for splitting, applying and combining data. 
+4. O. Alter, P. O. Brown and D. Botstein (2000). Singular Value Decomposition for Genome-Wide Expression Data Processing and Modeling. PNAS. 97:10101-10106
+5. H. Wickam (2011). ggplot2. WIREs Comp Stat, 3: 180–185. doi: 10.1002/wics.147
