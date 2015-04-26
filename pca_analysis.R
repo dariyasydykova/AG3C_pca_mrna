@@ -18,20 +18,25 @@ joined <- inner_join(reads,metadata,by = c('sample'='dataSet')) %>%
   spread(gene,count)
 
 # Here is where you can filter the data based on various conditions
-joined %>% filter(Growth.time > 24) -> filtered
+joined %>% filter(Growthtime.hr. > 24) -> filtered
 
 # In order to do PCA, you have to remove EVERYTHING that's not a gene count from
 # the data frame.
 filtered %>% select(-sample,
-                  -Experiment, 
-                  -Batch, 
-                  -Growth.Conditions, 
-                  -Growth.time, 
-                  -Harvest.Date, 
-                  -Notes.NGS, 
-                  -Cell_total, 
-                  -cells_per_tube, 
-                  -tubes_in_storage) -> joined
+                    -Experiment, 
+                    -Batch, 
+                    -GrowthConditions, 
+                    -Growthtime.hr., 
+                    -HarvestDate, 
+                    -Notes.NGS., 
+                    -Cell_total, 
+                    -cells_per_tube,
+                    -X.tubesinstorage,
+                    -concentration,
+                    -cellCondition,
+                    -condition,
+                    -Batch_Concentration,
+                    -Batch_Number) -> joined
 
 # Calculate PCA
 joined %>% prcomp() -> pca
@@ -39,8 +44,8 @@ joined %>% prcomp() -> pca
 # Now you need to add back in a column with some information that will
 # be used to color the points on the PCA plot. Here I'm coloring by
 # growth conditions.
-pca_data <- data.frame(pca$x, condition=filtered$Growth.Conditions)
+pca_data <- data.frame(pca$x, condition=filtered$GrowthConditions)
 
 # Generate plot
 p <- ggplot(pca_data, aes(x=PC1, y=PC2, color=condition)) + geom_point()
-ggsave('pca_all_samples.pdf',plot=p)
+print(p)

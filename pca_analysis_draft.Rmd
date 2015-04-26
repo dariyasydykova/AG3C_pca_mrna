@@ -1,0 +1,80 @@
+---
+title: "AG3C_PCA"
+output: html_document
+---
+
+### All Samples, All Conditions, All Time Points
+```{r, fig.width=10, fig.height=5, echo=FALSE}
+##########################################################################
+# This script must be run with 'deseq_normalized_mrna_data.csv' and
+# 'sample_list.csv' in the current working directory.
+##########################################################################
+
+rm(list=ls())
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(gridExtra)
+
+plot_pca <- function(filtered_data, color_by) {
+  filtered_data %>% select(starts_with('ECB')) -> joined
+
+  # Calculate PCA
+  joined %>% prcomp() -> pca
+  
+  # Now you need to add back in a column with some information that will
+  # be used to color the points on the PCA plot. Here I'm coloring by
+  # growth conditions.
+  pca_data <- data.frame(pca$x, condition=color_by)
+  
+  # Generate plot
+  p1 <- ggplot(pca_data, aes(x=PC1, y=PC2, color=factor(condition))) + 
+    geom_point() +
+    coord_equal()
+  
+  # Let's look at our rotations
+  rotation_data <- data.frame(pca$rotation, variable=row.names(pca$rotation))
+  
+  # define a pleasing arrow style
+  arrow_style <- arrow(length = unit(0.05, "inches"),
+                       type = "closed")
+  
+  # now plot, using geom_segment() for arrows and geom_text for labels
+  p2 <- ggplot(rotation_data) + 
+          geom_segment(aes(xend=PC1, yend=PC2), x=0, y=0, arrow=arrow_style) + 
+          geom_text(aes(x=PC1, y=PC2, label=variable), hjust=0, size=3, color='red') + 
+          xlim(-1.,1.25) + 
+          ylim(-1.,1.) +
+          coord_fixed()
+  
+  grid.arrange(p1,p2,ncol=2)
+  
+}
+
+# The following few lines just import data from CSVs and merge it into one
+# data frame for easy analysis.
+reads <- read.csv('deseq_normalized_mrna_data.csv')
+reads %>% gather(sample, count, -X) -> reads
+metadata <- read.csv('metaRNA.csv')
+joined <- inner_join(reads,metadata,by = c('sample'='dataSet')) %>%
+  rename(gene=X) %>%
+  spread(gene,count)
+
+# Here is where you can filter the data based on various conditions
+joined %>% filter() -> filtered
+plot_pca(filtered, filtered$GrowthConditions)
+
+
+```
+
+This plot doesn't show much separation between the conditions, probably because there is such a diverse mixture of time points and growth conditions. However, the rotations show that ECB_00933, ECB_01646, ECB_02486, and ECB_03406 contribute the most to PC1 and PC2.
+
+### All Samples, All Conditions, <24 Hours
+```{r, fig.width=10, fig.height=5, echo=FALSE}
+joined %>% filter(Growthtime.hr. < 24) -> filtered
+plot_pca(filtered, filtered$GrowthConditions)
+
+
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
